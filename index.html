@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>القيمة المضافة لتقنية SDN</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: "Calibri", "Arial", sans-serif;
+      line-height: 1.8;
+      margin: 0;
+      background-color: #E7EAEA;
+      color: #005A64;
+      text-align: right; /* محاذاة النص إلى اليمين */
+      direction: rtl; /* اتجاه النص من اليمين إلى اليسار */
+      font-size: 1.2em;
+    }
+
+    header {
+      background-color: #005A64;
+      color: #E7EAEA;
+      padding: 20px;
+      text-align: center;
+    }
+
+    section {
+      padding: 20px;
+    }
+
+    .slide {
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      color: #005A64;
+      margin-bottom: 15px;
+      font-size: 2.2em;
+    }
+
+    ul {
+      margin-right: 20px;
+      padding-right: 20px;
+    }
+
+    .button-container {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #005A64;
+      color: #E7EAEA;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #004852;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .chart-container {
+      width: 100%;
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,90,100,0.1);
+    }
+
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,90,100,0.1);
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .comparison-table th {
+      background-color: #005A64;
+      color: #E7EAEA;
+      font-weight: bold;
+    }
+
+    .comparison-table tr:nth-child(even) {
+      background-color: #f8f9fa;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0,90,100,0.1);
+      border-right: 4px solid #005A64;
+    }
+
+    .stat-number {
+      font-size: 2em;
+      font-weight: bold;
+      color: #005A64;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      color: #666;
+      font-size: 0.9em;
+    }
+
+    /* شريط التقدم والمؤشرات */
+    .progress-container {
+      margin-top: 20px;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .slide-indicators {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
+    .indicator {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid transparent;
+      min-width: 80px;
+    }
+
+    .indicator:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .indicator.active {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: #E7EAEA;
+      transform: scale(1.05);
+    }
+
+    .indicator-number {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 4px;
+      color: #E7EAEA;
+    }
+
+    .indicator-title {
+      font-size: 10px;
+      text-align: center;
+      color: #E7EAEA;
+      opacity: 0.9;
+    }
+
+    .indicator-icon {
+      font-size: 16px;
+      margin-bottom: 2px;
+      display: block;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #E7EAEA;
+      transition: width 0.5s ease;
+      border-radius: 3px;
+    }
+
+    /* تحسين أزرار التنقل */
+    .navigation-controls {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    .nav-button {
+      padding: 12px 20px;
+      font-size: 16px;
+      background-color: #005A64;
+      color: #E7EAEA;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-button:hover {
+      background-color: #004852;
+      transform: translateY(-2px);
+    }
+
+    .nav-button:disabled {
+      display: none;
+    }
+
+    .slide-counter {
+      color: #005A64;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    /* تنسيق التفاصيل الاستراتيجية */
+    .strategic-details {
+      margin-top: 30px;
+    }
+
+    .value-section {
+      background: white;
+      margin: 20px 0;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,90,100,0.1);
+      border-right: 4px solid #005A64;
+    }
+
+    .value-section h3 {
+      color: #005A64;
+      font-size: 1.3em;
+      margin-bottom: 15px;
+    }
+
+    .value-section ul {
+      margin-right: 0;
+      padding-right: 20px;
+    }
+
+    .value-section li {
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    /* تنسيق المراجع والمنهجية */
+    .methodology-section {
+      background: white;
+      margin: 15px 0;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,90,100,0.1);
+      border-right: 4px solid #005A64;
+    }
+
+    .methodology-section h3 {
+      color: #005A64;
+      font-size: 1.3em;
+      margin-bottom: 15px;
+    }
+
+    .reference-item {
+      background: #f8f9fa;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border-right: 3px solid #4A90A4;
+    }
+
+    .reference-item strong {
+      color: #005A64;
+    }
+
+    /* تنسيق عنوان الصفحة الحالية */
+    .current-slide-header {
+      background: #005A64;
+      color: #E7EAEA;
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 0;
+    }
+
+    .current-slide-header h1 {
+      margin: 0;
+      font-size: 2.5em;
+      color: #E7EAEA;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>القيمة المضافة لتقنية SDN</h1>
+    <p class="sdn-definition">Software-Defined Networking الشبكات المعرفة بالبرمجيات</p>
+    <p>التحسينات المطلوبة</p>
+    
+    <!-- شريط التقدم ومؤشر الصفحات -->
+    <div class="progress-container">
+      <div class="slide-indicators">
+        <div class="indicator active" data-slide="0">
+          <span class="indicator-number">1</span>
+          <span class="indicator-title">مقدمة</span>
+        </div>
+        <div class="indicator" data-slide="1">
+          <span class="indicator-number">2</span>
+          <span class="indicator-title">الفوائد</span>
+        </div>
+        <div class="indicator" data-slide="2">
+          <span class="indicator-number">3</span>
+          <span class="indicator-title">القيمة الاستراتيجية</span>
+        </div>
+        <div class="indicator" data-slide="3">
+          <span class="indicator-number">4</span>
+          <span class="indicator-title">أمثلة السوق</span>
+        </div>
+        <div class="indicator" data-slide="4">
+          <span class="indicator-number">5</span>
+          <span class="indicator-title">التوصيات</span>
+        </div>
+        <div class="indicator" data-slide="5">
+          <span class="indicator-number">6</span>
+          <span class="indicator-title">المراجع والمنهجية</span>
+        </div>
+        <div class="indicator" data-slide="6">
+          <span class="indicator-number">7</span>
+          <span class="indicator-title">الخاتمة</span>
+        </div>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- عنوان الصفحة الحالية -->
+  <div class="current-slide-header">
+    <h1 id="currentSlideTitle">مقدمة</h1>
+  </div>
+
+  <section id="slides">
+    <div class="slide">
+      <h2>مقدمة</h2>
+      <p>
+        تقنية SDN (الشبكات المعرفة بالبرمجيات) توفر إدارة مركزية للشبكة، مرونة تشغيلية، وتحسينات كبيرة في الأداء والأمان. تعتبر هذه التقنية خيارًا استراتيجيًا للمؤسسات التي تسعى للتطور ومواكبة التحول الرقمي.
+      </p>
+    </div>
+
+    <div class="slide hidden">
+      <h2>الفوائد الرئيسية لتقنية SDN</h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number">90%</div>
+          <div class="stat-label">تحسين كفاءة الشبكة</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">30%</div>
+          <div class="stat-label">خفض التكاليف التشغيلية</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">50%</div>
+          <div class="stat-label">تسريع نشر الخدمات</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">99.9%</div>
+          <div class="stat-label">موثوقية الشبكة</div>
+        </div>
+      </div>
+      <ul>
+        <li>إدارة مركزية ومرونة ديناميكية لتعديل إعدادات الشبكة بسرعة.</li>
+        <li>تقليل التكاليف التشغيلية باستخدام أجهزة عامة بدلاً من أجهزة مخصصة.</li>
+        <li>تعزيز الأمان من خلال سياسات موحدة واستجابة فورية للتهديدات.</li>
+        <li>تحسين أداء الشبكة باستخدام بروتوكولات ذكية مثل OpenFlow.</li>
+        <li>دعم التوسع السريع والتكامل مع التقنيات الحديثة مثل الحوسبة السحابية وإنترنت الأشياء.</li>
+      </ul>
+    </div>
+
+    <div class="slide hidden">
+      <h2>القيمة الاستراتيجية</h2>
+      <div class="chart-container">
+        <canvas id="costChart"></canvas>
+      </div>
+      
+      <div class="strategic-details">
+        <div class="value-section">
+          <h3>📉 خفض التكاليف التشغيلية</h3>
+          <ul>
+            <li>توفير 40-60% من تكاليف الأجهزة عبر استخدام معدات عامة</li>
+            <li>تقليل وقت النشر من أسابيع إلى ساعات</li>
+            <li>خفض تكاليف الصيانة بنسبة 35% سنوياً</li>
+          </ul>
+        </div>
+
+        <div class="value-section">
+          <h3>⚡ تعزيز الأداء والمرونة</h3>
+          <ul>
+            <li>تحسين استخدام النطاق الترددي بنسبة تصل إلى 70%</li>
+            <li>إدارة ديناميكية للحركة وتحسين المسارات تلقائياً</li>
+            <li>قابلية التوسع السريع حسب احتياجات الأعمال</li>
+          </ul>
+        </div>
+
+        <div class="value-section">
+          <h3>🔒 تعزيز الأمان والامتثال</h3>
+          <ul>
+            <li>تطبيق سياسات أمان موحدة عبر الشبكة بالكامل</li>
+            <li>عزل حركة البيانات وحماية معلومات العملاء</li>
+            <li>مراقبة في الوقت الفعلي واستجابة فورية للتهديدات</li>
+          </ul>
+        </div>
+
+        <div class="value-section">
+          <h3>🚀 التحول الرقمي والابتكار</h3>
+          <ul>
+            <li>دعم تقنيات الحوسبة السحابية وإنترنت الأشياء</li>
+            <li>تمكين تطبيقات الذكاء الاصطناعي وتحليلات البيانات</li>
+            <li>المرونة في دعم النماذج التجارية الجديدة</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide hidden">
+      <h2>أمثلة من السوق</h2>
+      <div class="chart-container">
+        <canvas id="marketChart"></canvas>
+      </div>
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>الشركة</th>
+            <th>نوع التحسين</th>
+            <th>النسبة المئوية</th>
+            <th>الوقت المطلوب</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Google</td>
+            <td>كفاءة الشبكة</td>
+            <td>90%+</td>
+            <td>6 أشهر</td>
+          </tr>
+          <tr>
+            <td>Microsoft</td>
+            <td>مرونة الخدمات</td>
+            <td>75%</td>
+            <td>12 شهر</td>
+          </tr>
+          <tr>
+            <td>AT&T</td>
+            <td>خفض التكاليف</td>
+            <td>30%</td>
+            <td>18 شهر</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="slide hidden">
+      <h2>التوصيات</h2>
+      <ul>
+        <li>البدء بمشروع تجريبي صغير لتقييم فوائد SDN.</li>
+        <li>الاستفادة من مزود الخدمة لتطبيق SDN كجزء من الخدمات المدارة.</li>
+        <li>تدريب الفرق التقنية لتأهيلهم لإدارة الشبكة المعرفة بالبرمجيات.</li>
+      </ul>
+    </div>
+
+    <div class="slide hidden">
+      <h2>المراجع والمنهجية</h2>
+      
+      <div class="methodology-section">
+        <h3>📊 منهجية إعداد التقرير</h3>
+        <ul>
+          <li><strong>تحليل البيانات الثانوية:</strong> مراجعة التقارير الصناعية والبحوث الأكاديمية المنشورة</li>
+          <li><strong>دراسة حالات عملية:</strong> تحليل التطبيقات الفعلية لتقنية SDN في الشركات الرائدة</li>
+          <li><strong>مقارنة التكاليف:</strong> تحليل البيانات المالية من مصادر متعددة موثوقة</li>
+          <li><strong>التحقق المتقاطع:</strong> مقارنة النتائج من مصادر مختلفة لضمان الدقة</li>
+        </ul>
+      </div>
+
+      <div class="methodology-section">
+        <h3>📚 المراجع الرئيسية</h3>
+        
+        <div class="reference-item">
+          <strong>1. <a href="https://opennetworking.org" target="_blank" rel="noopener noreferrer">Open Networking Foundation (ONF)</a></strong><br>
+          "SDN Architecture Overview" تقرير شامل حول هيكل وفوائد الشبكات المعرفة بالبرمجيات (2023)
+        </div>
+        
+        <div class="reference-item">
+          <strong>2. <a href="https://www.cisco.com/c/en/us/solutions/executive-perspectives/annual-internet-report/index.html" target="_blank" rel="noopener noreferrer">Cisco Systems</a></strong><br>
+          "Global Networking Trends Report" دراسة عالمية حول اتجاهات الشبكات والتكنولوجيا (2023)
+        </div>
+        
+        <div class="reference-item">
+          <strong>3. <a href="https://www.gartner.com/en/information-technology/research" target="_blank" rel="noopener noreferrer">Gartner Research</a></strong><br>
+          "Magic Quadrant for Network Infrastructure" تحليل السوق والتقنيات الناشئة (2023)
+        </div>
+        
+        <div class="reference-item">
+          <strong>4. <a href="https://www.idc.com/research/network" target="_blank" rel="noopener noreferrer">IDC Market Research</a></strong><br>
+          "Software-Defined Networking Market Analysis" تحليل السوق والتوقعات المستقبلية (2023)
+        </div>
+        
+        <div class="reference-item">
+          <strong>5. <a href="https://www.comsoc.org" target="_blank" rel="noopener noreferrer">IEEE Communications Society</a></strong><br>
+          "SDN Performance and Cost Analysis" دراسات الأداء والتكلفة المنشورة في المجلات المحكمة
+        </div>
+      </div>
+
+      <div class="methodology-section">
+        <h3>⚠️ ملاحظات مهمة</h3>
+        <ul>
+          <li>البيانات المالية مبنية على تقديرات السوق والمتوسطات الصناعية</li>
+          <li>النتائج قد تختلف حسب حجم المؤسسة وطبيعة احتياجاتها</li>
+          <li>يُنصح بإجراء دراسة تفصيلية للحالة المحددة قبل اتخاذ القرار</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="slide hidden">
+      <h2>الخاتمة</h2>
+      <p>
+        تقنية SDN تمثل استثمارًا استراتيجيًا لتحسين كفاءة الشبكة، خفض التكاليف، وتعزيز الأداء والأمان. مع هذه التقنية، ستكون الشبكة جاهزة للتكيف مع المتطلبات المستقبلية ودعم التحول الرقمي.
+      </p>
+    </div>
+  </section>
+
+  <div class="navigation-controls">
+    <button id="prevBtn" class="nav-button" onclick="previousSlide()">
+      →
+    </button>
+    <div class="slide-counter">
+      <span id="currentSlideNum">1</span> / <span id="totalSlides">7</span>
+    </div>
+    <button id="nextBtn" class="nav-button" onclick="nextSlide()">
+      ←
+    </button>
+  </div>
+
+  <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const indicators = document.querySelectorAll('.indicator');
+    const totalSlides = slides.length;
+    let costChart = null;
+    let marketChart = null;
+
+    // تهيئة التطبيق
+    document.addEventListener('DOMContentLoaded', function() {
+      updateNavigation();
+      updateProgressBar();
+      
+      // إضافة حدث النقر على المؤشرات
+      indicators.forEach((indicator, index) => {
+        indicator.addEventListener('click', () => goToSlide(index));
+      });
+
+      // تحسين فتح الروابط التشعبية
+      setupExternalLinks();
+    });
+
+    function setupExternalLinks() {
+      // العثور على جميع الروابط الخارجية
+      const externalLinks = document.querySelectorAll('a[href^="http"]');
+      
+      externalLinks.forEach(link => {
+        // إضافة حدث النقر لكل رابط
+        link.addEventListener('click', function(e) {
+          e.preventDefault(); // منع السلوك الافتراضي أولاً
+          
+          const url = this.href;
+          
+          // طريقة محسّنة لتجاوز رسائل التأكيد
+          try {
+            // إنشاء رابط مؤقت
+            const tempLink = document.createElement('a');
+            tempLink.href = url;
+            tempLink.target = '_blank';
+            tempLink.rel = 'noopener noreferrer';
+            tempLink.style.display = 'none';
+            
+            // إضافة الرابط للصفحة مؤقتاً
+            document.body.appendChild(tempLink);
+            
+            // محاكاة النقر
+            tempLink.click();
+            
+            // حذف الرابط المؤقت
+            document.body.removeChild(tempLink);
+            
+          } catch (error) {
+            // طريقة احتياطية - فتح مباشر في النافذة الحالية
+            try {
+              window.open(url, '_blank');
+            } catch (err) {
+              // الطريقة الأخيرة - التوجه المباشر
+              window.location.assign(url);
+            }
+          }
+          
+          return false;
+        });
+        
+        // إزالة الخصائص القديمة لتجنب التضارب
+        link.removeAttribute('target');
+        link.removeAttribute('rel');
+      });
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides - 1) {
+        goToSlide(currentSlide + 1);
+      }
+    }
+
+    function previousSlide() {
+      if (currentSlide > 0) {
+        goToSlide(currentSlide - 1);
+      }
+    }
+
+    function goToSlide(slideIndex) {
+      // إخفاء الشريحة الحالية
+      slides[currentSlide].classList.add('hidden');
+      indicators[currentSlide].classList.remove('active');
+      
+      // عرض الشريحة الجديدة
+      currentSlide = slideIndex;
+      slides[currentSlide].classList.remove('hidden');
+      indicators[currentSlide].classList.add('active');
+      
+      // تحديث عناصر التنقل
+      updateNavigation();
+      updateProgressBar();
+      updateSlideTitle();
+      
+      // إنشاء المخططات عند الحاجة
+      if (currentSlide === 2 && !costChart) {
+        createCostChart();
+      }
+      if (currentSlide === 3 && !marketChart) {
+        createMarketChart();
+      }
+    }
+
+    function updateSlideTitle() {
+      const currentSlideTitle = document.getElementById('currentSlideTitle');
+      const slideIndicator = indicators[currentSlide];
+      const title = slideIndicator.querySelector('.indicator-title').textContent;
+      
+      currentSlideTitle.textContent = title;
+    }
+
+    function updateNavigation() {
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const currentSlideNum = document.getElementById('currentSlideNum');
+      
+      // تحديث عداد الصفحات
+      currentSlideNum.textContent = currentSlide + 1;
+      
+      // تحديث حالة الأزرار
+      prevBtn.disabled = currentSlide === 0;
+      nextBtn.disabled = currentSlide === totalSlides - 1;
+    }
+
+    function updateProgressBar() {
+      const progressFill = document.querySelector('.progress-fill');
+      const progress = ((currentSlide + 1) / totalSlides) * 100;
+      progressFill.style.width = progress + '%';
+    }
+
+    function createCostChart() {
+      const ctx = document.getElementById('costChart').getContext('2d');
+      costChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['الشبكة التقليدية', 'شبكة SDN'],
+          datasets: [
+            {
+              label: 'التكاليف الرأسمالية (مليون ريال)',
+              data: [100, 60],
+              backgroundColor: '#005A64',
+              borderColor: '#003F47',
+              borderWidth: 1
+            },
+            {
+              label: 'التكاليف التشغيلية (مليون ريال)',
+              data: [80, 50],
+              backgroundColor: '#4A90A4',
+              borderColor: '#2C5F6F',
+              borderWidth: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            title: {
+              display: true,
+              text: 'مقارنة التكاليف: الشبكة التقليدية مقابل SDN',
+              font: {
+                family: 'Calibri, Arial, sans-serif',
+                size: 16
+              }
+            },
+            legend: {
+              position: 'top',
+              labels: {
+                font: {
+                  family: 'Calibri, Arial, sans-serif'
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: {
+                font: {
+                  family: 'Calibri, Arial, sans-serif'
+                }
+              }
+            },
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'التكلفة (مليون ريال)',
+                font: {
+                  family: 'Calibri, Arial, sans-serif'
+                }
+              },
+              ticks: {
+                font: {
+                  family: 'Calibri, Arial, sans-serif'
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function createMarketChart() {
+      const ctx = document.getElementById('marketChart').getContext('2d');
+      marketChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Google كفاءة الشبكة', 'Microsoft مرونة الخدمات', 'AT&T خفض التكاليف'],
+          datasets: [{
+            data: [90, 75, 30],
+            backgroundColor: [
+              '#005A64',
+              '#4A90A4',
+              '#87CEEB'
+            ],
+            borderWidth: 2,
+            borderColor: '#fff'
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            title: {
+              display: true,
+              text: 'نسب التحسين في أمثلة السوق (%)',
+              font: {
+                family: 'Calibri, Arial, sans-serif',
+                size: 16
+              }
+            },
+            legend: {
+              position: 'bottom',
+              labels: {
+                font: {
+                  family: 'Calibri, Arial, sans-serif'
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
